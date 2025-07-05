@@ -1,416 +1,793 @@
-import React, { useState } from 'react';
-import { ChevronRight, ChevronLeft, Book, Download, Printer, Edit3, Sparkles, User, FileText, Palette, Users } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comic Creator Assistant</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const ComicCreatorApp = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [comicData, setComicData] = useState({
-    title: '',
-    mainCharacter: { name: '', description: '' },
-    storyline: '',
-    artStyle: '',
-    additionalCharacters: [],
-    pages: []
-  });
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
 
-  const steps = [
-    'Project Setup',
-    'Main Character',
-    'Storyline',
-    'Art Style',
-    'Additional Characters',
-    'AI Creation',
-    'Edit & Review',
-    'Export Options'
-  ];
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
 
-  const artStyles = [
-    { name: 'Classic Superhero', description: 'Bold lines, vibrant colors, dynamic poses' },
-    { name: 'Manga/Anime', description: 'Japanese comic style with expressive characters' },
-    { name: 'Cartoon/Animated', description: 'Friendly, colorful, family-friendly style' },
-    { name: 'Dark/Noir', description: 'Moody shadows, limited color palette' },
-    { name: 'Minimalist', description: 'Clean lines, simple shapes, modern look' },
-    { name: 'Realistic', description: 'Detailed, lifelike illustrations' }
-  ];
+        .header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem 0;
+        }
 
-  const handleInputChange = (field, value) => {
-    setComicData(prev => ({ ...prev, [field]: value }));
-  };
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #111827;
+        }
 
-  const addCharacter = () => {
-    setComicData(prev => ({
-      ...prev,
-      additionalCharacters: [...prev.additionalCharacters, { name: '', description: '', role: '' }]
-    }));
-  };
+        .header p {
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
 
-  const updateCharacter = (index, field, value) => {
-    setComicData(prev => ({
-      ...prev,
-      additionalCharacters: prev.additionalCharacters.map((char, i) => 
-        i === index ? { ...char, [field]: value } : char
-      )
-    }));
-  };
+        .progress-container {
+            padding: 1.5rem 0;
+        }
 
-  const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
 
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+        .progress-step {
+            display: flex;
+            align-items: center;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
 
-  const generateComic = () => {
-    // Simulate AI generation
-    const samplePages = [
-      { pageNumber: 1, panels: 4, description: "Opening scene introducing the main character" },
-      { pageNumber: 2, panels: 6, description: "Plot development and conflict introduction" },
-      { pageNumber: 3, panels: 5, description: "Character interaction and dialogue" },
-      { pageNumber: 4, panels: 4, description: "Climax and resolution" }
-    ];
-    setComicData(prev => ({ ...prev, pages: samplePages }));
-    nextStep();
-  };
+        .step-number {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
 
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Book className="w-16 h-16 mx-auto mb-4 text-blue-500" />
-              <h2 className="text-2xl font-bold mb-2">Let's Create Your Comic!</h2>
-              <p className="text-gray-600">Tell us about your comic book project</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Comic Title</label>
-              <input
-                type="text"
-                value={comicData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                placeholder="Enter your comic book title..."
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-        );
+        .step-number.active {
+            background: #3b82f6;
+            color: white;
+        }
 
-      case 1:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <User className="w-16 h-16 mx-auto mb-4 text-green-500" />
-              <h2 className="text-2xl font-bold mb-2">Main Character</h2>
-              <p className="text-gray-600">Describe your hero or protagonist</p>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Character Name</label>
-                <input
-                  type="text"
-                  value={comicData.mainCharacter.name}
-                  onChange={(e) => handleInputChange('mainCharacter', { ...comicData.mainCharacter, name: e.target.value })}
-                  placeholder="Enter character name..."
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Character Description</label>
-                <textarea
-                  value={comicData.mainCharacter.description}
-                  onChange={(e) => handleInputChange('mainCharacter', { ...comicData.mainCharacter, description: e.target.value })}
-                  placeholder="Describe your character's appearance, personality, powers, etc..."
-                  rows="4"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-        );
+        .step-number.inactive {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
 
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <FileText className="w-16 h-16 mx-auto mb-4 text-purple-500" />
-              <h2 className="text-2xl font-bold mb-2">Your Story</h2>
-              <p className="text-gray-600">What's your comic book about?</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Storyline</label>
-              <textarea
-                value={comicData.storyline}
-                onChange={(e) => handleInputChange('storyline', e.target.value)}
-                placeholder="Describe the plot, conflict, and how the story unfolds..."
-                rows="6"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="flex items-center mb-2">
-                <Sparkles className="w-5 h-5 text-blue-500 mr-2" />
-                <span className="font-medium text-blue-700">AI Suggestion</span>
-              </div>
-              <p className="text-blue-600 text-sm">Consider adding a mentor character or a plot twist in the middle to keep readers engaged!</p>
-            </div>
-          </div>
-        );
+        .step-title {
+            margin-left: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
 
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Palette className="w-16 h-16 mx-auto mb-4 text-orange-500" />
-              <h2 className="text-2xl font-bold mb-2">Art Style</h2>
-              <p className="text-gray-600">Choose your comic's visual style</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {artStyles.map((style, index) => (
-                <div
-                  key={index}
-                  onClick={() => handleInputChange('artStyle', style.name)}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                    comicData.artStyle === style.name 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <h3 className="font-semibold mb-2">{style.name}</h3>
-                  <p className="text-sm text-gray-600">{style.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+        .step-connector {
+            width: 1rem;
+            height: 2px;
+            margin: 0 1rem;
+            flex-shrink: 0;
+        }
 
-      case 4:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Users className="w-16 h-16 mx-auto mb-4 text-teal-500" />
-              <h2 className="text-2xl font-bold mb-2">Additional Characters</h2>
-              <p className="text-gray-600">Add supporting characters, villains, or sidekicks</p>
-            </div>
-            <div className="space-y-4">
-              {comicData.additionalCharacters.map((character, index) => (
-                <div key={index} className="p-4 border rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      value={character.name}
-                      onChange={(e) => updateCharacter(index, 'name', e.target.value)}
-                      placeholder="Character name..."
-                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <input
-                      type="text"
-                      value={character.role}
-                      onChange={(e) => updateCharacter(index, 'role', e.target.value)}
-                      placeholder="Role (villain, sidekick, etc.)..."
-                      className="p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <textarea
-                    value={character.description}
-                    onChange={(e) => updateCharacter(index, 'description', e.target.value)}
-                    placeholder="Character description..."
-                    rows="2"
-                    className="w-full mt-2 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              ))}
-              <button
-                onClick={addCharacter}
-                className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-400 transition-colors"
-              >
-                + Add Character
-              </button>
-            </div>
-          </div>
-        );
+        .connector-active {
+            background: #3b82f6;
+        }
 
-      case 5:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Sparkles className="w-16 h-16 mx-auto mb-4 text-yellow-500" />
-              <h2 className="text-2xl font-bold mb-2">AI Comic Generation</h2>
-              <p className="text-gray-600">Let AI create your comic book</p>
-            </div>
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h3 className="font-semibold mb-4">Comic Summary:</h3>
-              <div className="space-y-2 text-sm">
-                <p><strong>Title:</strong> {comicData.title}</p>
-                <p><strong>Main Character:</strong> {comicData.mainCharacter.name}</p>
-                <p><strong>Style:</strong> {comicData.artStyle}</p>
-                <p><strong>Additional Characters:</strong> {comicData.additionalCharacters.length}</p>
-              </div>
-            </div>
-            <div className="text-center">
-              <button
-                onClick={generateComic}
-                className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto"
-              >
-                <Sparkles className="w-5 h-5 mr-2" />
-                Generate Comic
-              </button>
-            </div>
-          </div>
-        );
+        .connector-inactive {
+            background: #e5e7eb;
+        }
 
-      case 6:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Edit3 className="w-16 h-16 mx-auto mb-4 text-red-500" />
-              <h2 className="text-2xl font-bold mb-2">Edit & Review</h2>
-              <p className="text-gray-600">Review and customize your comic</p>
-            </div>
-            <div className="space-y-4">
-              {comicData.pages.map((page, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-semibold">Page {page.pageNumber}</h3>
-                    <span className="text-sm text-gray-500">{page.panels} panels</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">{page.description}</p>
-                  <div className="flex space-x-2">
-                    <button className="px-3 py-1 bg-blue-100 text-blue-600 rounded text-sm hover:bg-blue-200">
-                      Edit Page
-                    </button>
-                    <button className="px-3 py-1 bg-green-100 text-green-600 rounded text-sm hover:bg-green-200">
-                      Add Panel
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <div className="flex items-center mb-2">
-                <Sparkles className="w-5 h-5 text-yellow-500 mr-2" />
-                <span className="font-medium text-yellow-700">AI Suggestions</span>
-              </div>
-              <ul className="text-yellow-600 text-sm space-y-1">
-                <li>• Consider adding more dialogue in page 2 for character development</li>
-                <li>• The climax could be more dramatic with a full-page panel</li>
-                <li>• Add background details to enhance the story's setting</li>
-              </ul>
-            </div>
-          </div>
-        );
+        .main-content {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
 
-      case 7:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <Download className="w-16 h-16 mx-auto mb-4 text-indigo-500" />
-              <h2 className="text-2xl font-bold mb-2">Export Your Comic</h2>
-              <p className="text-gray-600">Choose how you want to share your creation</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="border rounded-lg p-6 text-center">
-                <Printer className="w-12 h-12 mx-auto mb-4 text-blue-500" />
-                <h3 className="font-semibold mb-2">Print-Ready PDF</h3>
-                <p className="text-sm text-gray-600 mb-4">Download a formatted PDF ready for home printing and folding</p>
-                <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
-                  Download PDF
-                </button>
-              </div>
-              <div className="border rounded-lg p-6 text-center">
-                <Book className="w-12 h-12 mx-auto mb-4 text-green-500" />
-                <h3 className="font-semibold mb-2">Professional Print</h3>
-                <p className="text-sm text-gray-600 mb-4">High-resolution files for professional printing services</p>
-                <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">
-                  Export for Print
-                </button>
-              </div>
-            </div>
-            <div className="bg-green-50 p-6 rounded-lg text-center">
-              <h3 className="font-semibold text-green-800 mb-2">🎉 Congratulations!</h3>
-              <p className="text-green-700">Your comic "{comicData.title}" is complete and ready to share with the world!</p>
-            </div>
-          </div>
-        );
+        .step-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
-      default:
-        return null;
-    }
-  };
+        .step-icon {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto 1rem;
+        }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Comic Creator Assistant</h1>
-          <p className="text-gray-600 mt-2">Create amazing comics with AI assistance</p>
+        .step-title-main {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            border-color: #d1d5db;
+        }
+
+        .card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .character-card {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .character-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #d1d5db;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px dashed #d1d5db;
+            background: transparent;
+            color: #6b7280;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-add:hover {
+            border-color: #9ca3af;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            border: 1px solid #fed7aa;
+            color: #92400e;
+        }
+
+        .suggestion-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .suggestion-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.5rem;
+        }
+
+        .page-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .page-title {
+            font-weight: 600;
+        }
+
+        .page-panels {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .page-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+        }
+
+        .export-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .export-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .export-icon {
+            width: 3rem;
+            height: 3rem;
+            margin: 0 auto 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .step-title {
+                display: none;
+            }
+            
+            .character-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>Comic Creator Assistant</h1>
+            <p>Create amazing comics with AI assistance</p>
         </div>
-      </header>
+    </header>
 
-      {/* Progress Bar */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-8">
-          {steps.map((step, index) => (
-            <div key={index} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                index <= currentStep ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'
-              }`}>
-                {index + 1}
-              </div>
-              <div className="ml-2 text-sm font-medium text-gray-700 hidden md:block">
-                {step}
-              </div>
-              {index < steps.length - 1 && (
-                <div className={`w-4 h-0.5 mx-4 ${
-                  index < currentStep ? 'bg-blue-500' : 'bg-gray-200'
-                }`} />
-              )}
+    <!-- Progress Bar -->
+    <div class="container">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar">
+                <!-- Progress steps will be generated by JavaScript -->
             </div>
-          ))}
         </div>
-      </div>
-
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 pb-8">
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          {renderStepContent()}
-        </div>
-
-        {/* Navigation */}
-        <div className="flex justify-between mt-8">
-          <button
-            onClick={prevStep}
-            disabled={currentStep === 0}
-            className={`flex items-center px-6 py-3 rounded-lg ${
-              currentStep === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            <ChevronLeft className="w-5 h-5 mr-2" />
-            Previous
-          </button>
-
-          <button
-            onClick={nextStep}
-            disabled={currentStep === steps.length - 1}
-            className={`flex items-center px-6 py-3 rounded-lg ${
-              currentStep === steps.length - 1
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600'
-            }`}
-          >
-            Next
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </button>
-        </div>
-      </main>
     </div>
-  );
-};
 
-export default ComicCreatorApp;
+    <!-- Main Content -->
+    <main class="container">
+        <div class="main-content" id="mainContent">
+            <!-- Step content will be generated by JavaScript -->
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="btn btn-secondary" id="prevBtn" onclick="prevStep()">
+                <i data-lucide="chevron-left" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;"></i>
+                Previous
+            </button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+                Next
+                <i data-lucide="chevron-right" style="width: 1.25rem; height: 1.25rem; margin-left: 0.5rem;"></i>
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // App state
+        let currentStep = 0;
+        let comicData = {
+            title: '',
+            mainCharacter: { name: '', description: '' },
+            storyline: '',
+            artStyle: '',
+            additionalCharacters: [],
+            pages: []
+        };
+
+        const steps = [
+            'Project Setup',
+            'Main Character',
+            'Storyline',
+            'Art Style',
+            'Additional Characters',
+            'AI Creation',
+            'Edit & Review',
+            'Export Options'
+        ];
+
+        const artStyles = [
+            { name: 'Classic Superhero', description: 'Bold lines, vibrant colors, dynamic poses' },
+            { name: 'Manga/Anime', description: 'Japanese comic style with expressive characters' },
+            { name: 'Cartoon/Animated', description: 'Friendly, colorful, family-friendly style' },
+            { name: 'Dark/Noir', description: 'Moody shadows, limited color palette' },
+            { name: 'Minimalist', description: 'Clean lines, simple shapes, modern look' },
+            { name: 'Realistic', description: 'Detailed, lifelike illustrations' }
+        ];
+
+        // Initialize the app
+        function init() {
+            renderProgressBar();
+            renderStepContent();
+            updateNavigation();
+            lucide.createIcons();
+        }
+
+        function renderProgressBar() {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.innerHTML = '';
+
+            steps.forEach((step, index) => {
+                const stepElement = document.createElement('div');
+                stepElement.className = 'progress-step';
+                
+                stepElement.innerHTML = `
+                    <div class="step-number ${index <= currentStep ? 'active' : 'inactive'}">
+                        ${index + 1}
+                    </div>
+                    <div class="step-title">${step}</div>
+                `;
+                
+                progressBar.appendChild(stepElement);
+
+                if (index < steps.length - 1) {
+                    const connector = document.createElement('div');
+                    connector.className = `step-connector ${index < currentStep ? 'connector-active' : 'connector-inactive'}`;
+                    progressBar.appendChild(connector);
+                }
+            });
+        }
+
+        function renderStepContent() {
+            const mainContent = document.getElementById('mainContent');
+            
+            switch (currentStep) {
+                case 0:
+                    mainContent.innerHTML = `
+                        <div class="step-header">
+                            <div class="step-icon">
+                                <i data-lucide="book" style="width: 100%; height: 100%; color: #3b82f6;"></i>
+                            </div>
+                            <h2 class="step-title-main">Let's Create Your Comic!</h2>
+                            <p class="step-description">Tell us about your comic book project</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Comic Title</label>
+                            <input type="text" class="form-input" placeholder="Enter your comic book title..." 
+                                   value="${comicData.title}" onchange="updateComicData('title', this.value)">
+                        </div>
+                    `;
+                    break;
+
+                case 1:
+                    mainContent.innerHTML = `
+                        <div class="step-header">
+                            <div class="step-icon">
+                                <i data-lucide="user" style="width: 100%; height: 100%; color: #10b981;"></i>
+                            </div>
+                            <h2 class="step-title-main">Main Character</h2>
+                            <p class="step-description">Describe your hero or protagonist</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Character Name</label>
+                            <input type="text" class="form-input" placeholder="Enter character name..." 
+                                   value="${comicData.mainCharacter.name}" 
+                                   onchange="updateMainCharacter('name', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Character Description</label>
+                            <textarea class="form-input form-textarea" placeholder="Describe your character's appearance, personality, powers, etc..." 
+                                      onchange="updateMainCharacter('description', this.value)">${comicData.mainCharacter.description}</textarea>
+                        </div>
+                    `;
+                    break;
+
+                case 2:
+                    mainContent.innerHTML = `
+                        <div class="step-header">
+                            <div class="step-icon">
+                                <i data-lucide="file-text" style="width: 100%; height: 100%; color: #8b5cf6;"></i>
+                            </div>
+                            <h2 class="step-title-main">Your Story</h2>
+                            <p class="step-description">What's your comic book about?</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Storyline</label>
+                            <textarea class="form-input form-textarea" placeholder="Describe the plot, conflict, and how the story unfolds..." 
+                                      style="min-height: 150px;" onchange="updateComicData('storyline', this.value)">${comicData.storyline}</textarea>
+                        </div>
+                        <div class="alert alert-info">
+                            <div class="suggestion-header">
+                                <i data-lucide="sparkles" class="suggestion-icon"></i>
+                                AI Suggestion
+                            </div>
+                            <p>Consider adding a mentor character or a plot twist in the middle to keep readers engaged!</p>
+                        </div>
+                    `;
+                    break;
+
+                case 3:
+                    mainContent.innerHTML = `
+                        <div class="step-header">
+                            <div class="step-icon">
+                                <i data-lucide="palette" style="width: 100%; height: 100%; color: #f59e0b;"></i>
+                            </div>
+                            <h2 class="step-title-main">Art Style</h2>
+                            <p class="step-description">Choose your comic's visual style</p>
+                        </div>
+                        <div class="grid grid-2">
+                            ${artStyles.map(style => 
+                                `<div class="card ${comicData.artStyle === style.name ? 'selected' : ''}" 
+                                     onclick="selectArtStyle('${style.name}')">
+                                    <div class="card-title">${style.name}</div>
+                                    <div class="card-description">${style.description}</div>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    `;
+                    break;
+
+                case 4:
+                    mainContent.innerHTML = `
+                        <div class="step-header">
+                            <div class="step-icon">
+                                <i data-lucide="users" style="width: 100%; height: 100%; color: #06b6d4;"></i>
+                            </div>
+                            <h2 class="step-title-main">Additional Characters</h2>
+                            <p class="step-description">Add supporting characters, villains, or sidekicks</p>
+                        </div>
+                        <div id="charactersContainer">
+                            ${renderCharacters()}
+                        </div>
+                        <button class="btn-add" onclick="addCharacter()">+ Add Character</button>
+                    `;
+                    break;
+
+                case 5:
+                    mainContent.innerHTML = `
+                        <div class="step-header">
+                            <div class="step-icon">
+                                <i data-lucide="sparkles" style="width: 100%; height: 100%; color: #eab308;"></i>
+                            </div>
+                            <h2 class="step-title-main">AI Comic Generation</h2>
+                            <p class="step-description">Let AI create your comic book</p>
+                        </div>
+                        <div style="background: #f9fafb; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem;">
+                            <h3 style="font-weight: 600; margin-bottom: 1rem;">Comic Summary:</h3>
+                            <div style="font-size: 0.875rem; line-height: 1.6;">
+                                <p><strong>Title:</strong> ${comicData.title || 'Not set'}</p>
+                                <p><strong>Main Character:</strong> ${comicData.mainCharacter.name || 'Not set'}</p>
+                                <p><strong>Style:</strong> ${comicData.artStyle || 'Not selected'}</p>
+                                <p><strong>Additional Characters:</strong> ${comicData.additionalCharacters.length}</p>
+                            </div>
+                        </div>
+                        <div style="text-align: center;">
+                            <button class="btn btn-primary" onclick="generateComic()">
+                                <i data-lucide="sparkles" style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;"></i>
+                                Generate Comic
+                            </button>
+                        </div>
+                    `;
+                    break;
+
+                case 6:
+                    mainContent.innerHTML = `
+                        <div class="step-header">
+                            <div class="step-icon">
+                                <i data-lucide="edit-3" style="width: 100%; height: 100%; color: #ef4444;"></i>
+                            </div>
+                            <h2 class="step-title-main">Edit & Review</h2>
+                            <p class="step-description">Review and customize your comic</p>
+                        </div>
+                        ${renderPages()}
+                        <div class="alert alert-warning">
+                            <div class="suggestion-header">
+                                <i data-lucide="sparkles" class="suggestion-icon"></i>
+                                AI Suggestions
+                            </div>
+                            <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+                                <li>Consider adding more dialogue in page 2 for character development</li>
+                                <li>The climax could be more dramatic with a full-page panel</li>
+                                <li>Add background details to enhance the story's setting</li>
+                            </ul>
+                        </div>
+                    `;
+                    break;
+
+                case 7:
+                    mainContent.innerHTML = `
+                        <div class="step-header">
+                            <div class="step-icon">
+                                <i data-lucide="download" style="width: 100%; height: 100%; color: #6366f1;"></i>
+                            </div>
+                            <h2 class="step-title-main">Export Your Comic</h2>
+                            <p class="step-description">Choose how you want to share your creation</p>
+                        </div>
+                        <div class="export-grid">
+                            <div class="export-card">
+                                <div class="export-icon">
+                                    <i data-lucide="printer" style="width: 100%; height: 100%; color: #3b82f6;"></i>
+                                </div>
+                                <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Print-Ready PDF</h3>
+                                <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">Download a formatted PDF ready for home printing and folding</p>
+                                <button class="btn btn-primary">Download PDF</button>
+                            </div>
+                            <div class="export-card">
+                                <div class="export-icon">
+                                    <i data-lucide="book" style="width: 100%; height: 100%; color: #10b981;"></i>
+                                </div>
+                                <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Professional Print</h3>
+                                <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">High-resolution files for professional printing services</p>
+                                <button class="btn btn-primary" style="background: #10b981;">Export for Print</button>
+                            </div>
+                        </div>
+                        <div class="alert alert-success" style="text-align: center; margin-top: 2rem;">
+                            <h3 style="font-weight: 600; margin-bottom: 0.5rem;">🎉 Congratulations!</h3>
+                            <p>Your comic "${comicData.title}" is complete and ready to share with the world!</p>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            lucide.createIcons();
+        }
+
+        function renderCharacters() {
+            return comicData.additionalCharacters.map((character, index) => 
+                `<div class="character-card">
+                    <div class="character-inputs">
+                        <input type="text" class="form-input" placeholder="Character name..." 
+                               value="${character.name}" onchange="updateCharacter(${index}, 'name', this.value)">
+                        <input type="text" class="form-input" placeholder="Role (villain, sidekick, etc.)..." 
+                               value="${character.role || ''}" onchange="updateCharacter(${index}, 'role', this.value)">
+                    </div>
+                    <textarea class="form-input form-textarea" placeholder="Character description..." 
+                              style="min-height: 60px;" onchange="updateCharacter(${index}, 'description', this.value)">${character.description}</textarea>
+                </div>`
+            ).join('');
+        }
+
+        function renderPages() {
+            if (comicData.pages.length === 0) {
+                return '<p style="text-align: center; color: #6b7280; padding: 2rem;">Generate your comic first to see pages here.</p>';
+            }
+
+            return comicData.pages.map(page => 
+                `<div class="page-card">
+                    <div class="page-header">
+                        <div class="page-title">Page ${page.pageNumber}</div>
+                        <div class="page-panels">${page.panels} panels</div>
+                    </div>
+                    <div class="page-description">${page.description}</div>
+                    <div class="page-actions">
+                        <button class="btn btn-small" style="background: #dbeafe; color: #1e40af;">Edit Page</button>
+                        <button class="btn btn-small" style="background: #dcfce7; color: #166534;">Add Panel</button>
+                    </div>
+                </div>`
+            ).join('');
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentStep === 0;
+            nextBtn.disabled = currentStep === steps.length - 1;
+            
+            if (currentStep === steps.length - 1) {
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'inline-flex';
+            }
+        }
+
+        // Event handlers
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderProgressBar();
+                renderStepContent();
+                updateNavigation();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderProgressBar();
+                renderStepContent();
+                updateNavigation();
+            }
+        }
+
+        function updateComicData(field, value) {
+            comicData[field] = value;
+        }
+
+        function updateMainCharacter(field, value) {
+            comicData.mainCharacter[field] = value;
+        }
+
+        function selectArtStyle(styleName) {
+            comicData.artStyle = styleName;
+            renderStepContent();
+        }
+
+        function addCharacter() {
+            comicData.additionalCharacters.push({ name: '', description: '', role: '' });
+            renderStepContent();
+        }
+
+        function updateCharacter(index, field, value) {
+            comicData.additionalCharacters[index][field] = value;
+        }
+
+        function generateComic() {
+            // Simulate AI generation
+            const samplePages = [
+                { pageNumber: 1, panels: 4, description: "Opening scene introducing the main character" },
+                { pageNumber: 2, panels: 6, description: "Plot development and conflict introduction" },
+                { pageNumber: 3, panels: 5, description: "Character interaction and dialogue" },
+                { pageNumber: 4, panels: 4, description: "Climax and resolution" }
+            ];
+            comicData.pages = samplePages;
+            nextStep();
+        }
+
+        // Initialize the app when the page loads
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
